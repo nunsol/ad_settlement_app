@@ -62,7 +62,7 @@ group :development do
 end
 
 # Excel processing
-gem "roo", "~> 2.10"           # Excel/CSV reading
+gem "roo", "~> 3.0"            # Excel/CSV reading
 gem "rubyXL", "~> 3.4"         # Excel writing/modification
 gem "caxlsx", "~> 4.1"         # Excel generation (alternative)
 gem "csv"                      # Required by roo

@@ -13,17 +13,17 @@ class SettlementFile < ApplicationRecord
 
   def self.detect_file_type(filename)
     case filename
-    when /네이버SA_GFA|네이버_SA|naver/i
+    when /네이버.*SA.*GFA|네이버_SA|naver/i
       "naver"
-    when /카카오_모먼트|카카오모먼트|kakao.*moment/i
+    when /카카오.*모먼트|kakao.*moment/i
       "kakao_moment"
-    when /카카오_키워드|카카오키워드|kakao.*keyword/i
+    when /카카오.*키워드|kakao.*keyword/i
       "kakao_keyword"
-    when /카카오_브랜드|카카오브랜드|kakao.*brand/i
+    when /카카오.*브랜드|kakao.*brand/i
       "kakao_brand"
-    when /카카오톡.*채널|카카오채널|kakao.*channel/i
+    when /카카오톡.*채널|카카오.*채널|kakao.*channel/i
       "kakao_channel"
-    when /구글정산|구글.*정산|google/i
+    when /구글.*정산|google/i
       "google"
     else
       "unknown"

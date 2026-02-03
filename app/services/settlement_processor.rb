@@ -128,15 +128,17 @@ class SettlementProcessor
         route_info = router.route(account_id)
 
         if route_info
-          # 대행사 시트에 데이터 추가
+          # 대행사 시트에 정리된 데이터 추가
           agency = route_info[:agency]
+          account_info = route_info[:account_info]
           processor.append_to_agency_sheet(
             agency,
-            row[:raw_data],
+            row,
+            account_info: account_info,
             source_type: settlement_file.file_type
           )
 
-          # 매체 통합 시트에도 추가
+          # 매체 통합 시트에는 원본 데이터 추가
           media_type = settlement_file.file_type.to_sym
           processor.append_to_media_sheet(media_type, row[:raw_data])
 

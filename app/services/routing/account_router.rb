@@ -3,20 +3,21 @@ module Routing
     ACCOUNT_SHEET_NAME = "계정정리"
 
     # 계정정리 시트 컬럼 인덱스 (0-based)
+    # 실제 템플릿: A열 비어있음, B열부터 데이터 시작
     COLUMNS = {
-      advertiser_name: 0,    # A열: 광고주명
-      account_name: 1,       # B열: 계정명
-      account_id: 2,         # C열: 계정아이디(구글CID)
-      account_password: 3,   # D열: 계정비번
-      invoice_type: 4,       # E열: 계산서 발행구분
-      charge_type: 5,        # F열: (충전유형)
-      manager: 6,            # G열: 담당자명
-      media: 7,              # H열: 매체
-      product: 8,            # I열: 상품
-      agency: 9,             # J열: 대행사
-      commission_rate: 10,   # K열: 수수료율
-      deduction_rate: 11,    # L열: 차감수수료율
-      note: 12               # M열: 비고
+      advertiser_name: 1,    # B열: 광고주명 (계산서와 그룹웨어 발급기준)
+      account_name: 2,       # C열: 계정명
+      account_id: 3,         # D열: 계정아이디(구글CID) ★ 매핑 키
+      account_password: 4,   # E열: 계정비번
+      invoice_type: 5,       # F열: 계산서 발행구분
+      charge_type: 6,        # G열: (충전유형 - 계정직접충전 등)
+      manager: 7,            # H열: 담당자명
+      media: 8,              # I열: 매체
+      product: 9,            # J열: 상품
+      agency: 10,            # K열: 대행사 ★ 라우팅 대상
+      commission_rate: 11,   # L열: 수수료율
+      deduction_rate: 12,    # M열: 차감수수료율
+      note: 13               # N열: 비고
     }.freeze
 
     attr_reader :account_map, :agency_list, :errors

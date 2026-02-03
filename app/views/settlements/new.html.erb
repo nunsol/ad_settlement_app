@@ -5,6 +5,32 @@
     <p class="text-gray-500 text-[15px]">매체별 정산 데이터를 대행사별로 자동 분류해요</p>
   </div>
 
+  <script>
+    function handleFileSelect(input, displayId) {
+      const display = document.getElementById(displayId);
+      const container = input.closest('.file-upload-container');
+      const placeholder = container.querySelector('.file-placeholder');
+
+      if (input.files.length > 0) {
+        const fileNames = Array.from(input.files).map(f => f.name);
+        if (fileNames.length === 1) {
+          display.textContent = fileNames[0];
+        } else {
+          display.textContent = `${fileNames.length}개 파일 선택됨`;
+        }
+        display.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        container.classList.add('border-[#3182F6]', 'bg-[#F2F6FC]');
+        container.classList.remove('border-gray-200');
+      } else {
+        display.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        container.classList.remove('border-[#3182F6]', 'bg-[#F2F6FC]');
+        container.classList.add('border-gray-200');
+      }
+    }
+  </script>
+
   <% if flash[:alert] %>
     <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
       <div class="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -50,18 +76,22 @@
           </div>
         </div>
         <label class="block cursor-pointer">
-          <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#3182F6] hover:bg-[#FAFBFD] transition-all group">
+          <div class="file-upload-container border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#3182F6] hover:bg-[#FAFBFD] transition-all group">
             <div class="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-[#F2F6FC] flex items-center justify-center mx-auto mb-3 transition-colors">
               <svg class="w-6 h-6 text-gray-400 group-hover:text-[#3182F6] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
-            <p class="text-[14px] font-medium text-gray-600 group-hover:text-[#3182F6]">파일을 선택하거나 드래그하세요</p>
-            <p class="text-[12px] text-gray-400 mt-1">.xlsx 파일만 지원</p>
+            <div class="file-placeholder">
+              <p class="text-[14px] font-medium text-gray-600 group-hover:text-[#3182F6]">파일을 선택하거나 드래그하세요</p>
+              <p class="text-[12px] text-gray-400 mt-1">.xlsx 파일만 지원</p>
+            </div>
+            <p id="template-file-display" class="hidden text-[14px] font-semibold text-[#3182F6]"></p>
             <%= file_field_tag :template_file,
                 accept: ".xlsx,.xls",
                 required: true,
-                class: "hidden" %>
+                class: "hidden",
+                onchange: "handleFileSelect(this, 'template-file-display')" %>
           </div>
         </label>
       </div>
@@ -80,19 +110,23 @@
           </div>
         </div>
         <label class="block cursor-pointer mb-4">
-          <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#3182F6] hover:bg-[#FAFBFD] transition-all group">
+          <div class="file-upload-container border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#3182F6] hover:bg-[#FAFBFD] transition-all group">
             <div class="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-[#F2F6FC] flex items-center justify-center mx-auto mb-3 transition-colors">
               <svg class="w-6 h-6 text-gray-400 group-hover:text-[#3182F6] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <p class="text-[14px] font-medium text-gray-600 group-hover:text-[#3182F6]">여러 파일 선택 가능</p>
-            <p class="text-[12px] text-gray-400 mt-1">다중 선택: Cmd/Ctrl + 클릭</p>
+            <div class="file-placeholder">
+              <p class="text-[14px] font-medium text-gray-600 group-hover:text-[#3182F6]">여러 파일 선택 가능</p>
+              <p class="text-[12px] text-gray-400 mt-1">다중 선택: Cmd/Ctrl + 클릭</p>
+            </div>
+            <p id="raw-files-display" class="hidden text-[14px] font-semibold text-[#3182F6]"></p>
             <%= file_field_tag :raw_files,
                 multiple: true,
                 accept: ".xlsx,.xls",
                 required: true,
-                class: "hidden" %>
+                class: "hidden",
+                onchange: "handleFileSelect(this, 'raw-files-display')" %>
           </div>
         </label>
 

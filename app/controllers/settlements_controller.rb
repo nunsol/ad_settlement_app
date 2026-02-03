@@ -22,7 +22,8 @@ class SettlementsController < ApplicationController
 
       # 정산 파일들 첨부
       if params[:raw_files].present?
-        params[:raw_files].each do |file|
+        raw_files = Array(params[:raw_files])
+        raw_files.each do |file|
           next if file.blank?
 
           file_type = SettlementFile.detect_file_type(file.original_filename)

@@ -121,7 +121,7 @@
               <p class="text-[12px] text-gray-400 mt-1">다중 선택: Cmd/Ctrl + 클릭</p>
             </div>
             <p id="raw-files-display" class="hidden text-[14px] font-semibold text-[#3182F6]"></p>
-            <%= file_field_tag :raw_files,
+            <%= file_field_tag 'raw_files[]',
                 multiple: true,
                 accept: ".xlsx,.xls",
                 required: true,

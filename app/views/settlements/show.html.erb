@@ -1,0 +1,248 @@
+<div class="max-w-3xl mx-auto px-6">
+  <!-- 헤더 -->
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <%= link_to settlements_path, class: "text-gray-400 hover:text-gray-600 transition-colors" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        <% end %>
+        <h1 class="text-[24px] font-bold text-gray-900"><%= @settlement.period %> 정산</h1>
+      </div>
+      <p class="text-gray-500 text-[14px]">정산 ID: #<%= @settlement.id %></p>
+    </div>
+    <div class="flex gap-2">
+      <% if @settlement.pending? && @settlement.can_process? %>
+        <%= button_to process_settlement_settlement_path(@settlement),
+            method: :post,
+            class: "px-5 py-2.5 bg-[#3182F6] hover:bg-[#1B64DA] text-white text-[14px] font-semibold toss-btn",
+            data: { turbo_confirm: "정산을 시작하시겠습니까?" } do %>
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            정산 시작
+          </span>
+        <% end %>
+      <% end %>
+      <% if @settlement.completed? && @settlement.result_file.attached? %>
+        <%= link_to download_settlement_path(@settlement),
+            class: "px-5 py-2.5 bg-[#20C997] hover:bg-[#12B886] text-white text-[14px] font-semibold toss-btn flex items-center gap-2" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          다운로드
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Flash Messages -->
+  <% if flash[:notice] %>
+    <div class="mb-6 p-4 bg-[#E8F5E9] border border-[#C8E6C9] rounded-2xl flex items-start gap-3">
+      <div class="w-5 h-5 rounded-full bg-[#4CAF50] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <p class="text-[#2E7D32] text-[14px] font-medium"><%= flash[:notice] %></p>
+    </div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3">
+      <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <p class="text-red-600 text-[14px] font-medium"><%= flash[:alert] %></p>
+    </div>
+  <% end %>
+
+  <!-- 상태 카드 -->
+  <div class="toss-card p-6 mb-5">
+    <div class="flex items-center justify-between mb-6">
+      <span class="text-[15px] font-medium text-gray-500">처리 상태</span>
+      <% case @settlement.status %>
+      <% when "pending" %>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold bg-[#FFF8E1] text-[#F57F17]">
+          <span class="w-2 h-2 bg-[#FFC107] rounded-full"></span>
+          대기 중
+        </span>
+      <% when "processing" %>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold bg-[#E3F2FD] text-[#1565C0]">
+          <span class="w-2 h-2 bg-[#2196F3] rounded-full animate-pulse"></span>
+          처리 중
+        </span>
+      <% when "completed" %>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold bg-[#E8F5E9] text-[#2E7D32]">
+          <span class="w-2 h-2 bg-[#4CAF50] rounded-full"></span>
+          완료
+        </span>
+      <% when "failed" %>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold bg-red-50 text-red-600">
+          <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+          실패
+        </span>
+      <% end %>
+    </div>
+
+    <!-- 통계 -->
+    <div class="grid grid-cols-3 gap-4">
+      <div class="text-center p-4 bg-[#F8F9FA] rounded-2xl">
+        <p class="text-[13px] text-gray-500 mb-1">총 데이터</p>
+        <p class="text-[24px] font-bold text-gray-900"><%= number_with_delimiter(@settlement.total_rows || 0) %></p>
+      </div>
+      <div class="text-center p-4 bg-[#E8F5E9] rounded-2xl">
+        <p class="text-[13px] text-[#2E7D32] mb-1">매칭 성공</p>
+        <p class="text-[24px] font-bold text-[#2E7D32]"><%= number_with_delimiter(@settlement.matched_rows || 0) %></p>
+      </div>
+      <div class="text-center p-4 bg-red-50 rounded-2xl">
+        <p class="text-[13px] text-red-500 mb-1">매칭 실패</p>
+        <p class="text-[24px] font-bold text-red-600"><%= number_with_delimiter(@settlement.unmatched_rows || 0) %></p>
+      </div>
+    </div>
+
+    <!-- 매칭률 바 -->
+    <% if @settlement.total_rows.to_i > 0 %>
+      <div class="mt-6">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[13px] font-medium text-gray-600">매칭률</span>
+          <span class="text-[15px] font-bold text-[#3182F6]"><%= @settlement.match_rate %>%</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+          <div class="progress-bar h-2.5 rounded-full transition-all duration-700" style="width: <%= @settlement.match_rate %>%"></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- 에러 메시지 -->
+  <% if @settlement.failed? && @settlement.error_message.present? %>
+    <div class="toss-card p-6 mb-5 border-l-4 border-red-500">
+      <h3 class="text-[15px] font-semibold text-red-600 mb-2 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        오류 발생
+      </h3>
+      <p class="text-[14px] text-gray-600"><%= @settlement.error_message %></p>
+    </div>
+  <% end %>
+
+  <!-- 업로드된 파일 -->
+  <div class="toss-card p-6 mb-5">
+    <h2 class="text-[17px] font-bold text-gray-900 mb-4">업로드된 파일</h2>
+
+    <div class="space-y-3">
+      <% if @settlement.template_file.attached? %>
+        <div class="flex items-center justify-between p-4 bg-[#F8F9FA] rounded-2xl">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#E8F5E9] flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#4CAF50]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-[14px] font-semibold text-gray-900"><%= @settlement.template_file.filename %></p>
+              <p class="text-[12px] text-gray-500">마스터 템플릿</p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <% @settlement_files.each do |sf| %>
+        <%
+          colors = case sf.file_type
+          when 'naver' then { bg: '#E8F5E9', icon: '#4CAF50', badge: 'bg-[#E8F5E9] text-[#2E7D32]' }
+          when /kakao/ then { bg: '#FFF8E1', icon: '#FFC107', badge: 'bg-[#FFF8E1] text-[#F57F17]' }
+          when 'google' then { bg: '#E3F2FD', icon: '#2196F3', badge: 'bg-[#E3F2FD] text-[#1565C0]' }
+          else { bg: '#F5F5F5', icon: '#9E9E9E', badge: 'bg-gray-100 text-gray-600' }
+          end
+        %>
+        <div class="flex items-center justify-between p-4 bg-[#F8F9FA] rounded-2xl">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: <%= colors[:bg] %>">
+              <svg class="w-5 h-5" style="color: <%= colors[:icon] %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-[14px] font-semibold text-gray-900 truncate max-w-xs"><%= sf.original_filename %></p>
+              <span class="inline-block px-2 py-0.5 text-[11px] font-semibold rounded-lg <%= colors[:badge] %>"><%= sf.file_type %></span>
+            </div>
+          </div>
+          <div class="text-right">
+            <% if sf.status == "completed" %>
+              <p class="text-[14px] font-semibold text-gray-900"><%= sf.matched_count %>/<%= sf.rows_count %></p>
+              <p class="text-[11px] text-gray-500">매칭됨</p>
+            <% elsif sf.status == "processing" %>
+              <span class="text-[13px] text-[#3182F6] font-medium">처리 중...</span>
+            <% elsif sf.status == "failed" %>
+              <span class="text-[13px] text-red-500 font-medium">실패</span>
+            <% else %>
+              <span class="text-[13px] text-gray-400 font-medium">대기</span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 대행사별 배분 현황 -->
+  <% if @settlement.agency_distribution.present? && @settlement.agency_distribution.any? %>
+    <div class="toss-card p-6 mb-5">
+      <h2 class="text-[17px] font-bold text-gray-900 mb-4">대행사별 배분</h2>
+      <div class="space-y-2 max-h-80 overflow-y-auto">
+        <% @settlement.agency_distribution.sort_by { |_, v| -(v["rows"] || 0) }.first(20).each do |agency, stats| %>
+          <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+            <span class="text-[14px] font-medium text-gray-900"><%= agency %></span>
+            <div class="flex items-center gap-4">
+              <span class="text-[14px] text-gray-500"><%= stats["unique_accounts"] %>개 계정</span>
+              <span class="text-[14px] font-semibold text-[#3182F6]"><%= number_with_delimiter(stats["rows"]) %>건</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- 매칭 실패 목록 -->
+  <% if @settlement.unmatched_accounts.present? && @settlement.unmatched_accounts.any? %>
+    <div class="toss-card p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-[17px] font-bold text-gray-900">매칭 실패 계정</h2>
+          <p class="text-[13px] text-gray-500 mt-0.5">계정정리 시트에서 찾을 수 없는 계정</p>
+        </div>
+        <span class="px-3 py-1 bg-red-50 text-red-600 text-[13px] font-semibold rounded-full"><%= @settlement.unmatched_accounts.size %>개</span>
+      </div>
+
+      <div class="overflow-hidden rounded-2xl border border-gray-100">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-[#F8F9FA]">
+              <th class="px-4 py-3 text-left text-[12px] font-semibold text-gray-500 uppercase tracking-wide">계정 ID</th>
+              <th class="px-4 py-3 text-left text-[12px] font-semibold text-gray-500 uppercase tracking-wide">파일</th>
+              <th class="px-4 py-3 text-right text-[12px] font-semibold text-gray-500 uppercase tracking-wide">행</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% @settlement.unmatched_accounts.first(50).each do |item| %>
+              <tr class="hover:bg-[#FAFBFD] transition-colors">
+                <td class="px-4 py-3 text-[13px] font-mono font-medium text-red-600"><%= item["account_id"] %></td>
+                <td class="px-4 py-3 text-[13px] text-gray-600 truncate max-w-[200px]"><%= item["file"] %></td>
+                <td class="px-4 py-3 text-[13px] text-gray-500 text-right"><%= item["row_number"] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <% if @settlement.unmatched_accounts.size > 50 %>
+        <p class="text-center text-[13px] text-gray-400 mt-4">외 <%= @settlement.unmatched_accounts.size - 50 %>개 더...</p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

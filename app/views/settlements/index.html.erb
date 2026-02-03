@@ -1,0 +1,114 @@
+<div class="max-w-3xl mx-auto px-6">
+  <!-- 헤더 -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-[28px] font-bold text-gray-900">정산 내역</h1>
+      <p class="text-gray-500 text-[15px] mt-1">이전 정산 작업 목록</p>
+    </div>
+    <%= link_to new_settlement_path, class: "px-5 py-2.5 bg-[#3182F6] hover:bg-[#1B64DA] text-white text-[14px] font-semibold toss-btn flex items-center gap-2" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      새 정산
+    <% end %>
+  </div>
+
+  <% if @settlements.any? %>
+    <div class="space-y-3">
+      <% @settlements.each do |settlement| %>
+        <%
+          icon_bg = case settlement.status
+            when 'completed' then 'bg-[#E8F5E9]'
+            when 'failed' then 'bg-red-50'
+            when 'processing' then 'bg-[#E3F2FD]'
+            else 'bg-[#FFF8E1]'
+          end
+        %>
+        <%= link_to settlement_path(settlement), class: "block toss-card p-5 hover:shadow-lg transition-all group" do %>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <!-- 아이콘 -->
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center <%= icon_bg %>">
+                <% case settlement.status %>
+                <% when 'completed' %>
+                  <svg class="w-6 h-6 text-[#4CAF50]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                <% when 'failed' %>
+                  <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                <% when 'processing' %>
+                  <svg class="w-6 h-6 text-[#2196F3] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                <% else %>
+                  <svg class="w-6 h-6 text-[#FFC107]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                <% end %>
+              </div>
+
+              <!-- 정보 -->
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[17px] font-bold text-gray-900 group-hover:text-[#3182F6] transition-colors"><%= settlement.period %></span>
+                  <% case settlement.status %>
+                  <% when 'pending' %>
+                    <span class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-[#FFF8E1] text-[#F57F17]">대기</span>
+                  <% when 'processing' %>
+                    <span class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-[#E3F2FD] text-[#1565C0]">처리중</span>
+                  <% when 'completed' %>
+                    <span class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-[#E8F5E9] text-[#2E7D32]">완료</span>
+                  <% when 'failed' %>
+                    <span class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-red-50 text-red-600">실패</span>
+                  <% end %>
+                </div>
+                <p class="text-[13px] text-gray-500 mt-0.5"><%= settlement.created_at.strftime("%Y년 %m월 %d일 %H:%M") %></p>
+              </div>
+            </div>
+
+            <!-- 매칭률 -->
+            <div class="flex items-center gap-4">
+              <% if settlement.total_rows.to_i > 0 %>
+                <div class="text-right">
+                  <p class="text-[15px] font-bold text-[#3182F6]"><%= settlement.match_rate %>%</p>
+                  <p class="text-[11px] text-gray-400"><%= number_with_delimiter(settlement.matched_rows || 0) %>/<%= number_with_delimiter(settlement.total_rows || 0) %></p>
+                </div>
+              <% end %>
+              <svg class="w-5 h-5 text-gray-300 group-hover:text-[#3182F6] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- 진행률 바 (완료된 경우) -->
+          <% if settlement.completed? && settlement.total_rows.to_i > 0 %>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                <div class="progress-bar h-1.5 rounded-full" style="width: <%= settlement.match_rate %>%"></div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <!-- 빈 상태 -->
+    <div class="toss-card p-12 text-center">
+      <div class="w-20 h-20 rounded-3xl bg-[#F2F6FC] flex items-center justify-center mx-auto mb-5">
+        <svg class="w-10 h-10 text-[#3182F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h3 class="text-[18px] font-bold text-gray-900 mb-2">아직 정산 내역이 없어요</h3>
+      <p class="text-[14px] text-gray-500 mb-6">첫 정산을 시작해보세요</p>
+      <%= link_to new_settlement_path, class: "inline-flex items-center gap-2 px-6 py-3 bg-[#3182F6] hover:bg-[#1B64DA] text-white text-[15px] font-semibold toss-btn" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        새 정산 시작하기
+      <% end %>
+    </div>
+  <% end %>
+</div>
